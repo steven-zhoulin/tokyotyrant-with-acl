@@ -45,96 +45,96 @@ int ACL_NODES_TAIL = 0;
 
 static int parse_mask(char *mask) {
 
-    int imask = atoi(mask);
-    int rtn = 0;
-    int i;
+  int imask = atoi(mask);
+  int rtn = 0;
+  int i;
     
-    for (i = 31; i >= (32 - imask); i--) {
-        rtn += (0x1 << i);
-    }
+  for (i = 31; i >= (32 - imask); i--) {
+    rtn += (0x1 << i);
+  }
     
-    return rtn;
+  return rtn;
 }
 
 static struct acl_node parse_acl_node(char *line) {
 
-    char *addr = strtok(line, "/");
-    char *mask = strtok(NULL, "/");
-    if (NULL == mask) {
-        mask = "32";
-    }
+  char *addr = strtok(line, "/");
+  char *mask = strtok(NULL, "/");
+  if (NULL == mask) {
+    mask = "32";
+  }
 
-    int net = 0;
-    char *p = strtok(addr, ".");
-    while (NULL != p) {
-        net = (net << 8) + atoi(p);
-        p = strtok(NULL, ".");
-    }
+  int net = 0;
+  char *p = strtok(addr, ".");
+  while (NULL != p) {
+    net = (net << 8) + atoi(p);
+    p = strtok(NULL, ".");
+  }
     
-    net = net & parse_mask(mask);
+  net = net & parse_mask(mask);
     
-    struct acl_node netNode;
-    netNode.net = net;
-    netNode.len = atoi(mask);
+  struct acl_node netNode;
+  netNode.net = net;
+  netNode.len = atoi(mask);
 
-    return netNode;
+  return netNode;
 } 
 
 static int parse_address(char *ip) {
 
-    char addr[100];
-    int rtn = 0;
+  char addr[100];
+  int rtn = 0;
 
-    strcpy(addr, ip);
-    char *result = strtok(addr, ".");
-    while (NULL != result) {
-        int i = atoi(result);
-        rtn = (rtn << 8) + i;
-        result = strtok(NULL, ".");
-    }
-    return rtn;
+  strcpy(addr, ip);
+  char *result = strtok(addr, ".");
+  while (NULL != result) {
+    int i = atoi(result);
+    rtn = (rtn << 8) + i;
+    result = strtok(NULL, ".");
+  }
+  return rtn;
 }
 
 bool acl_check(char *ip) {
-    int rtn = 0;
-    int addr = parse_address(ip);
+  int rtn = 0;
+  int addr = parse_address(ip);
     
-    int i;
-    for (i = 0; i < ACL_NODES_TAIL; i++) {
-        int k;
-        int len = 32 - ACL_NODES[i].len;
-        for (k = 31; k >= len; k--) {
-            if (((0x1 << k) & ACL_NODES[i].net) != ((0x1 << k) & addr)) {
-                break;
-            }
-        }
-        
-        if (k == (len - 1)) {
-            return 1;
-        }
+  int i;
+  for (i = 0; i < ACL_NODES_TAIL; i++) {
+    int k;
+    int len = 32 - ACL_NODES[i].len;
+    for (k = 31; k >= len; k--) {
+      if (((0x1 << k) & ACL_NODES[i].net) != ((0x1 << k) & addr)) {
+        break;
+      }
     }
+        
+    if (k == (len - 1)) {
+      return 1;
+    }
+  }
 
-    return rtn;
+  return rtn;
 }
 
 void init_acl_list(char *acl_file) {
 
-    printf("access control file: %s\n", acl_file);
+  printf("access control file: %s\n", acl_file);
 
-    FILE *fp;
-    char line[1025];
+  FILE *fp;
+  char line[1025];
 
-    if ( NULL == (fp = fopen(acl_file, "r")) ) {
-        printf("fopen error!\n");
-        exit(EXIT_FAILURE);
-    }
+  if ( NULL == (fp = fopen(acl_file, "r")) ) {
+    printf("fopen error!\n");
+    exit(EXIT_FAILURE);
+  }
 
-    while (fgets(line, sizeof line, fp)) {
-        struct acl_node node = parse_acl_node(line);
-        ACL_NODES[ACL_NODES_TAIL++] = node;
-    }
+  while (fgets(line, sizeof line, fp)) {
+    struct acl_node node = parse_acl_node(line);
+    ACL_NODES[ACL_NODES_TAIL++] = node;
+  }
 
-    fclose(fp);
+  fclose(fp);
 }
 /** add by steven@2015-03-25 */
 

@@ -60,8 +60,8 @@ typedef struct {                         /* type of structure for a socket */
  * access control list (add by steven@2015-03-25)
  */
 struct acl_node {
-    int net;
-    int len;
+  int net;
+  int len;
 };
 
 void init_acl_list(char *acl_file);

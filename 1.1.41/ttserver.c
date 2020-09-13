@@ -322,8 +322,8 @@ int main(int argc, char **argv){
   }
 
   if (acl_file != NULL) {
-     ACL_ENABLE = 1;
-     init_acl_list(acl_file);
+    ACL_ENABLE = 1;
+    init_acl_list(acl_file);
   }
 
   if(!dbname) dbname = "*";
